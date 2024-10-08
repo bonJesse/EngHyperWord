@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>单词喵V1.01-LLM英语单词高级查询</title>
+    <title>单词喵V1.03-LLM英语单词高级查询</title>
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-HGYYKNHRZ9"></script>
     <script>
@@ -15,8 +15,7 @@
     <!-- External CSS -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-   <style>
-        /* Color variables */
+    <style>
         :root {
             --primary-color: #4a90e2;
             --secondary-color: #f6a96f;
@@ -27,7 +26,6 @@
             --button-hover-color: #3a7bc8;
         }
 
-        /* Base styles */
         body, html {
             font-family: 'Roboto', sans-serif;
             background-color: var(--background-color);
@@ -35,9 +33,9 @@
             margin: 0;
             padding: 0;
             height: 100%;
+            transition: background-color 0.3s ease;
         }
 
-        /* Container layout */
         .container {
             display: flex;
             flex-direction: column;
@@ -46,35 +44,37 @@
             margin: 0 auto;
         }
 
-        /* Panel styles */
         .left-panel, .right-panel {
             padding: 20px;
+            transition: all 0.3s ease;
         }
+
         .left-panel {
             flex: 0 0 auto;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+
         .right-panel {
             flex: 1;
             overflow-y: auto;
         }
 
-        /* Card styles */
         .card {
             background-color: var(--card-background);
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             padding: 20px;
             margin-bottom: 20px;
+            transition: all 0.3s ease;
         }
+
         .input-card {
             width: 100%;
             max-width: 400px;
         }
 
-        /* Typography */
         h1 {
             font-weight: 400;
             font-size: 20px;
@@ -84,7 +84,6 @@
             text-align: center;
         }
 
-        /* Button styles */
         .button {
             width: 100%;
             padding: 12px 20px;
@@ -95,27 +94,37 @@
             font-size: 16px;
             font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.1s;
         }
+
         .button:hover {
             background-color: var(--button-hover-color);
         }
 
-        /* Input styles */
+        .button:active {
+            transform: scale(0.98);
+        }
+
         #wordInput {
             width: 100%;
             padding: 12px;
             font-size: 16px;
-            border: 1px solid #d1d1d6;
+            border: 2px solid #d1d1d6;
             border-radius: 8px;
             margin-bottom: 15px;
             box-sizing: border-box;
+            transition: border-color 0.3s;
         }
-        /* Functionality buttons styles */
+
+        #wordInput:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
         .functionality-buttons {
             display: flex;
             justify-content: space-around;
-            margin-top: -20px;
+            margin-top: -15px;
             width: 100%;
             max-width: 400px;
         }
@@ -124,16 +133,21 @@
             background: none;
             border: none;
             font-size: 24px;
-            color: #4a90e2; /* 改为蓝色 */
+            color: #4a90e2;
             cursor: pointer;
             padding: 10px;
             border-radius: 50%;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s, color 0.3s, transform 0.1s;
         }
+
         .icon-button:hover {
-            background-color: rgba(74, 144, 226, 0.1); /* 蓝色的淡化版本 */
+            background-color: rgba(74, 144, 226, 0.1);
         }
-    /* Dark mode styles */
+
+        .icon-button:active {
+            transform: scale(0.95);
+        }
+
         body.dark-mode {
             --background-color: #1a1a1a;
             --card-background: #2a2a2a;
@@ -143,69 +157,54 @@
         }
 
         body.dark-mode .icon-button {
-            color: #7ab5ff; /* 暗模式下的蓝色 */
+            color: #7ab5ff;
         }
 
         body.dark-mode .icon-button:hover {
-            background-color: rgba(122, 181, 255, 0.2); /* 暗模式下蓝色的淡化版本 */
+            background-color: rgba(122, 181, 255, 0.2);
         }
-        /* Result styles */
+
         #result {
             position: relative;
             padding-bottom: 40px;
         }
-        .info-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border-radius: 10px;
+
+        .info-card {
+            background-color: var(--card-background);
+            border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: box-shadow 0.3s ease;
+            margin-bottom: 15px;
+            padding: 15px;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
         }
-        .info-section:hover {
+
+        .info-card:hover {
+            transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
-        /* Section color coding */
-        .word { background-color: #E8F4F8; }
-        .pinyin { background-color: #E8F8ED; }
-        .part-of-speech { background-color: #FFF8E8; }
-        .definition { background-color: #FCE8F1; }
-        .thai-definition { background-color: #F0E8F8; }
-        .example { background-color: #F3E8F8; }
+        .info-card-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
 
-        /* Copy All button */
-        #copyAllButton {
-            position: sticky;
-            bottom: 20px;
-            right: 20px;
-            float: right;
-            padding: 8px 15px;
+        .info-card-content {
+            font-size: 16px;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .info-card-subcontent {
             font-size: 14px;
-            background-color: rgba(255, 165, 0, 0.6);
-            z-index: 10;
-        }
-        #copyAllButton:hover {
-            background-color: rgba(255, 165, 0, 0.8);
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-top: 5px;
         }
 
-        /* Dynamic Island notification */
-        #dynamicIsland {
-            position: fixed;
-            top: 68px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0,0,0,0.8);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            z-index: 1000;
-            display: none;
-            transition: all 0.3s ease;
-            max-width: 90%;
-            text-align: center;
-        }
-
-        /* Copy button for sections */
         .copy-button {
             position: absolute;
             bottom: 5px;
@@ -220,29 +219,33 @@
         .copy-button svg {
             width: 16px;
             height: 16px;
-            fill: #888; /* 灰色 */
+            fill: #888;
+            transition: fill 0.3s;
         }
 
-        .copy-button:hover {
-            opacity: 0.7;
+        .copy-button:hover svg {
+            fill: var(--primary-color);
         }
 
-        /* 暗黑模式样式 */
-        body.dark-mode .copy-button svg {
-            fill: #aaa; /* 暗模式下稍微亮一点的灰色 */
+        #dynamicIsland {
+            position: fixed;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            z-index: 1000;
+            transition: top 0.3s ease;
+            max-width: 90%;
+            text-align: center;
         }
 
-        /* Section styles */
-        .section-title {
-            font-weight: 500;
-            margin-bottom: 10px;
-            color: #1d1d1f;
-        }
-        .section-content {
-            margin-left: 10px;
+        #dynamicIsland.show {
+            top: 20px;
         }
 
-        /* Clear button */
         .clear-button {
             position: absolute;
             right: 10px;
@@ -251,63 +254,74 @@
             background: transparent;
             color: #9c9a9a;
             border: none;
-            width: 20px;
-            height: 20px;
             font-size: 18px;
-            line-height: 1;
             cursor: pointer;
             display: none;
             padding: 0;
-            text-align: center;
+            transition: color 0.3s;
         }
+
         .clear-button:hover {
             color: #666;
         }
 
-        /* Logo styles */
         .logo-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 5px;
             width: 100px;
             height: 100px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .logo-container svg {
-            width: 100%;
-            height: 100%;
+            margin: 0 auto 20px;
+            transition: transform 0.3s ease;
         }
 
-        /* Input wrapper */
+        .logo-container:hover {
+            transform: scale(1.05);
+        }
+
         .input-wrapper {
             position: relative;
             width: 100%;
         }
 
-        /* Share button */
         .share-button {
             position: absolute;
             top: 310px;
             right: 15px;
-            background-color: #f6a96f;
-            color: rgb(246, 233, 208);
+            background-color: var(--secondary-color);
+            color: white;
             border: none;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            font-size: 15px;
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
             cursor: pointer;    
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .share-button:hover {
-            background-color: #a5b6ff61;
+            transition: background-color 0.3s, transform 0.1s;
         }
 
-        /* Responsive design */
+        .share-button:hover {
+            background-color: #e59860;
+        }
+
+        .share-button:active {
+            transform: scale(0.95);
+        }
+
+        .example-sentence {
+            margin-bottom: 10px;
+            line-height: 1.6;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .example-sentence::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+        }
+
         @media (min-width: 768px) {
             .container {
                 flex-direction: row;
@@ -333,141 +347,42 @@
             #wordInput {
                 padding: 10px;
             }
-            .info-section {
-                padding: 10px;
-            }
             .logo-container {
-                width: 50px;
-                height: 50px;
-            }
-            .share-button {
-                width: 36px;
-                height: 36px;
-                font-size: 16px;
+                width: 80px;
+                height: 80px;
             }
         }
 
-        /* 新增样式 */
-        .synonyms { background-color: #E8F8F5; }
-        .antonyms { background-color: #FDF2E9; }
-        .etymology { background-color: #EAF2F8; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-        /* 新增和修改的样式 */
-        #resultCard {
-            background-color: #f5f5f5;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
         }
 
         #queryWord {
             font-size: 24px;
-            color: #333;
-            margin-bottom: 15px;
-            text-align: center;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .info-card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-            padding: 15px;
-            position: relative;
-            padding-bottom: 30px; /* 为复制按钮留出空间 */
-        }
-
-        .info-card-title {
-            font-size: 16px;
             font-weight: bold;
-            color: #4a90e2;
-            margin-bottom: 10px;
-        }
-
-        .info-card-content {
-            font-size: 14px;
-            color: #333;
-            line-height: 1.4;
-        }
-
-        .copy-button {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
-            transition: opacity 0.3s;
-        }
-
-        .copy-button svg {
-            width: 16px;
-            height: 16px;
-            fill: #888; /* 灰色 */
-        }
-
-        .copy-button:hover {
-            opacity: 0.7;
-        }
-
-        /* 暗黑模式样式 */
-        body.dark-mode #resultCard {
-            background-color: #2a2a2a;
-        }
-
-        body.dark-mode .info-card {
-            background-color: #3a3a3a;
-        }
-
-        body.dark-mode .info-card-title {
-            color: #7ab5ff;
-        }
-
-        body.dark-mode .info-card-content {
-            color: #d0d0d0;
-        }
-
-        body.dark-mode .copy-button svg {
-            fill: #aaa; /* 暗模式下稍微亮一点的灰色 */
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            #resultCard {
-                padding: 15px;
-            }
-            
-            .info-card {
-                padding: 12px;
-            }
-        }
-
-        /* 例句样式 */
-        .example-sentence {
-            margin-bottom: 15px;
-            line-height: 1.6;
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .example-sentence::before {
-            content: "***";
-            position: absolute;
-            left: 0;
-            color: #4a90e2;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="left-panel">
-            <!-- Logo -->
             <div class="logo-container">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
                     <style>
@@ -477,45 +392,28 @@
                       .eye-color { fill: #ffffff; }
                       .pupil-color { fill: #ec791a; }
                     </style>
-                    
-                    <!-- Cat's body -->
                     <circle cx="25" cy="30" r="15" class="cat-color" />
-                    
-                    <!-- Cat's ears -->
                     <polygon points="15,20 20,10 25,20" class="cat-color" />
                     <polygon points="35,20 30,10 25,20" class="cat-color" />
-                    
-                    <!-- Cat's eyes -->
                     <circle cx="20" cy="25" r="4" class="eye-color" />
                     <circle cx="30" cy="25" r="4" class="eye-color" />
                     <circle cx="20" cy="25" r="2" class="pupil-color" />
                     <circle cx="30" cy="25" r="2" class="pupil-color" />
-                    
-                    <!-- Cat's nose -->
                     <circle cx="25" cy="28" r="1" fill="#FFC0CB" />
-                    
-                    <!-- Cat's smile -->
                     <path d="M22 31 Q25 33, 28 31" stroke="white" stroke-width="1" fill="none" />
-                    
-                    <!-- Cat's whiskers -->
                     <line x1="15" y1="30" x2="10" y2="29" stroke="white" stroke-width="1" />
                     <line x1="15" y1="31" x2="10" y2="31" stroke="white" stroke-width="0.6" />
                     <line x1="15" y1="32" x2="10" y2="33" stroke="white" stroke-width="1" />
-                    
                     <line x1="35" y1="30" x2="40" y2="29" stroke="white" stroke-width="1" />
                     <line x1="35" y1="31" x2="40" y2="31" stroke="white" stroke-width="0.6" />
                     <line x1="35" y1="32" x2="40" y2="33" stroke="white" stroke-width="1" />
-                    
-                    <!-- Book -->
-                    <rect x="6" y="38" width="38    " height="6" class="book-color" />
-                    
-                    <!-- Text on book -->
+                    <rect x="6" y="38" width="38" height="6" class="book-color" />
                     <rect x="10" y="38" width="28" height="10" fill="white" />
                     <text x="12" y="46" class="text">A B C</text>
-   
+                </svg>
             </div>
-            <div class="card input-card">
-                <h1>单词喵<br>LLM英语单词高级查询V1.01</h1>
+            <div class="card input-card fade-in">
+                <h1>单词喵<br>LLM英语单词高级查询V1.03</h1>
                 <div class="input-wrapper">
                     <input type="text" id="wordInput" placeholder="请输入英语单词">
                     <button id="clearButton" class="clear-button">✖</button>
@@ -543,22 +441,18 @@
     </div>
     <div id="dynamicIsland"></div>
 
-    <!-- External JS libraries -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
-        // API 配置, Gemini Project:EngHyperWord
         const API_KEY = "AIzaSyAYpVi9kjPY69-6LmxgZIqp5ZC6vs3L8W8";
         const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
     
-        // DOM 元素
         const wordInput = document.getElementById('wordInput');
         const analyzeButton = document.getElementById('analyzeButton');
         const resultCard = document.getElementById('resultCard');
         const dynamicIsland = document.getElementById('dynamicIsland');
         const clearButton = document.getElementById('clearButton');
     
-        // 事件监听器
         document.addEventListener('DOMContentLoaded', () => {
             const analyzeButton = document.getElementById('analyzeButton');
             const wordInput = document.getElementById('wordInput');
@@ -568,14 +462,18 @@
             const advancedSettings = document.getElementById('advancedSettings');
 
             if (analyzeButton) analyzeButton.addEventListener('click', handleAnalyzeClick);
-            if (wordInput) wordInput.addEventListener('input', toggleClearButton);
+            if (wordInput) {
+                wordInput.addEventListener('input', toggleClearButton);
+                wordInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleAnalyzeClick();
+                });
+            }
             if (clearButton) clearButton.addEventListener('click', clearInput);
             if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
             if (languageToggle) languageToggle.addEventListener('click', toggleLanguage);
             if (advancedSettings) advancedSettings.addEventListener('click', showAdvancedSettings);
         });
     
-        // 主要功能函数
         function handleAnalyzeClick() {
             const word = wordInput.value.trim();
             if (word) {
@@ -620,7 +518,7 @@
                 console.log('API响应数据:', data);
                 
                 if (!data.candidates?.[0]?.content?.parts) {
-                    throw new Error('API返回的数据格式确');
+                    throw new Error('API返回的数据格式不正确');
                 }
                 
                 const result = data.candidates[0].content.parts[0].text;
@@ -629,7 +527,7 @@
                 showNotification('分析完成');
             } catch (error) {
                 console.error('API错误:', error);
-                showNotification('分析失败，重试');
+                showNotification('分析失败，请重试');
             }
         }
     
@@ -643,7 +541,6 @@
             }
             resultCard.style.display = 'block';
             
-            // 显示查询的单词
             const queryWordElement = document.getElementById('queryWord');
             if (queryWordElement) {
                 queryWordElement.textContent = originalWord;
@@ -651,16 +548,13 @@
                 console.error('未找到queryWord元素');
             }
             
-            // 解析API返回的结果
             const sections = result.split('**').filter(section => section.trim());
             
-            // 清空之前的内容
             resultContent.innerHTML = '';
             
-            // 创建信息卡片的函数
-            function createInfoCard(title, content) {
+            function createInfoCard(title, content, subcontent = '') {
                 const cardElement = document.createElement('div');
-                cardElement.className = 'info-card';
+                cardElement.className = 'info-card slide-in';
                 
                 const titleElement = document.createElement('div');
                 titleElement.className = 'info-card-title';
@@ -668,26 +562,18 @@
                 
                 const contentElement = document.createElement('div');
                 contentElement.className = 'info-card-content';
+                contentElement.textContent = content;
                 
-                // 特殊处理例句部分
-                if (title.toLowerCase().includes('例句')) {
-                    const sentences = content.split(/[.。]/).filter(sentence => sentence.trim());
-                    sentences.forEach(sentence => {
-                        if (sentence.trim()) {
-                            const sentenceElement = document.createElement('div');
-                            sentenceElement.className = 'example-sentence';
-                            sentenceElement.textContent = sentence.trim() + '.';
-                            contentElement.appendChild(sentenceElement);
-                        }
-                    });
-                } else {
-                    contentElement.textContent = content;
+                if (subcontent) {
+                    const subcontentElement = document.createElement('div');
+                    subcontentElement.className = 'info-card-subcontent';
+                    subcontentElement.textContent = subcontent;
+                    contentElement.appendChild(subcontentElement);
                 }
                 
                 cardElement.appendChild(titleElement);
                 cardElement.appendChild(contentElement);
                 
-                // 添加复制按钮
                 const copyButton = document.createElement('button');
                 copyButton.className = 'copy-button';
                 copyButton.innerHTML = `
@@ -695,28 +581,38 @@
                         <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
                     </svg>
                 `;
-                copyButton.addEventListener('click', () => copyTextToClipboard(contentElement.textContent));
+                copyButton.addEventListener('click', () => copyTextToClipboard(content + (subcontent ? '\n' + subcontent : '')));
                 cardElement.appendChild(copyButton);
                 
                 return cardElement;
             }
             
-            // 创建并添加每个部分的卡片
             sections.forEach(section => {
                 const [title, ...contentLines] = section.split('\n');
                 const trimmedTitle = title.trim().replace(/^\d+\.\s*/, '');
-                const content = contentLines.join(' ').trim();
+                let content = contentLines.join(' ').trim();
+                let subcontent = '';
                 
-                const infoCard = createInfoCard(trimmedTitle, content);
+                if (trimmedTitle === '中文释义' || trimmedTitle === '英文释义') {
+                    const parts = content.split(/[,，]/);
+                    content = parts[0].trim();
+                    subcontent = parts.slice(1).join(', ').trim();
+                }
+                
+                if (trimmedTitle === '英文例句') {
+                    const sentences = content.split(/[.。]/).filter(sentence => sentence.trim());
+                    content = sentences.map(sentence => `• ${sentence.trim()}.`).join('\n');
+                }
+                
+                const infoCard = createInfoCard(trimmedTitle, content, subcontent);
                 resultContent.appendChild(infoCard);
             });
         }
     
-        // 辅助函数
         function showNotification(message) {
             dynamicIsland.textContent = message;
-            dynamicIsland.style.display = 'block';
-            setTimeout(() => dynamicIsland.style.display = 'none', 3000);
+            dynamicIsland.classList.add('show');
+            setTimeout(() => dynamicIsland.classList.remove('show'), 3000);
         }
     
         function copyTextToClipboard(text) {
@@ -739,25 +635,6 @@
             wordInput.focus();
         }
     
-        function handleCopyClick() {
-            const content = this.previousElementSibling.textContent;
-            copyTextToClipboard(content);
-        }
-    
-        function handleSelectionChange() {
-            // 处理文本选择变化的逻辑
-        }
-    
-        function handleDocumentClick(e) {
-            // 处理文档点击事件的逻辑
-        }
-    
-        function shareResult() {
-            // 分享结果的逻辑
-            showNotification('分功能即将推出');
-        }
-    
-        // 主题切换函数
         function toggleTheme() {
             document.body.classList.toggle('dark-mode');
             const themeIcon = document.querySelector('#themeToggle i');
@@ -768,17 +645,11 @@
             showNotification(document.body.classList.contains('dark-mode') ? '已切换到夜间模式' : '已切换到日间模式');
         }
     
-        // 语言切换函数
         function toggleLanguage() {
-            // 这里应该实现语言切换的逻辑
-            // 暂时只显示通知
             showNotification('语言切换功能即将推出');
         }
     
-        // 高级设置函数
         function showAdvancedSettings() {
-            // 这里应该实现显示高级设置的逻辑
-            // 暂时只显示通知
             showNotification('高级设置功能即将推出');
         }
     </script>
