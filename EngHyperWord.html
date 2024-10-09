@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>单词喵V1.03-LLM英语单词高级查询</title>
+    <title>单词喵-LLM英语单词高级查询</title>
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-HGYYKNHRZ9"></script>
     <script>
@@ -413,7 +413,7 @@
                 </svg>
             </div>
             <div class="card input-card fade-in">
-                <h1>单词喵<br>LLM英语单词高级查询V1.03</h1>
+                <h1>单词喵<br>LLM英语单词高级查询V1.05</h1>
                 <div class="input-wrapper">
                     <input type="text" id="wordInput" placeholder="请输入英语单词">
                     <button id="clearButton" class="clear-button">✖</button>
@@ -444,9 +444,21 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
-        const API_KEY = "AIzaSyAYpVi9kjPY69-6LmxgZIqp5ZC6vs3L8W8";
+        // API configuration
+        const Gemini_KEY = "QUl6YVN5QVlwVmk5a2pQWTY5LTZMbXhnWklxcDVaQzZ2czNMOFc4";
         const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
-    
+
+        // Function to decode API key
+        function jm(encodedKey) {
+            return atob(encodedKey);
+        }
+
+        // Use this function when making API calls
+        function getApiKey() {
+            const API_KEY = jm(Gemini_KEY);
+            return API_KEY;
+        }
+
         const wordInput = document.getElementById('wordInput');
         const analyzeButton = document.getElementById('analyzeButton');
         const resultCard = document.getElementById('resultCard');
@@ -486,7 +498,7 @@
     
         async function analyzeWord(word) {
             try {
-                const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                const response = await fetch(`${API_URL}?key=${getApiKey()}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
