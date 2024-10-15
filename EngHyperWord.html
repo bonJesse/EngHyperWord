@@ -286,7 +286,7 @@
             animation: fadeInUp 0.5s ease-out;
         }
 
-        /* 适配不同主题 */
+        /* 适配不主题 */
         body[data-theme="像素风"] .info-card,
         body[data-theme="打字机风格"] .info-card {
             border: 2px solid var(--text-color);
@@ -535,7 +535,7 @@
         }
 
         /* 打字机风格 */
-        body[data-theme="打字机风格"] {
+        body[data-theme="打字机风��"] {
             font-family: "Courier New", monospace;
             background-color: #f4e9d9;
             color: #333;
@@ -576,6 +576,145 @@
             --button-color: #8b4513;
             --button-hover-color: #a0522d;
         }
+
+        .word-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 10px;
+        }
+
+        .word-cell {
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .word-cell:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .word-text {
+            font-weight: bold;
+            display: block;
+        }
+
+        .search-icon {
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 12px;
+            margin: 5px auto 0;
+        }
+
+        body.dark-mode .word-cell {
+            background-color: #333;
+            color: #fff;
+        }
+
+        body.dark-mode .word-cell:hover {
+            background-color: #444;
+        }
+
+        .floating-search-icon {
+            position: absolute;
+            background-color: rgba(74, 144, 226, 0.1);
+            color: var(--primary-color);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s, color 0.3s, transform 0.3s, background-color 0.3s;
+            z-index: 1000;
+            font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .floating-search-icon:hover {
+            opacity: 1;
+            transform: scale(1.1);
+            background-color: rgba(74, 144, 226, 0.2);
+        }
+
+        .floating-search-icon.clicked {
+            color: #ffffff;
+            background-color: #4a90e2;
+            transform: scale(0.9);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .fade-in-scale {
+            animation: fadeInScale 0.3s ease-out;
+        }
+
+        /* 添加新的样式 */
+        .pronunciation {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .pronunciation span {
+            margin-right: 10px;
+        }
+        
+        body.dark-mode .pronunciation {
+            color: #aaa;
+        }
+
+        #queryWordContainer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+
+        #queryWord {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-right: 15px;
+        }
+
+        .pronunciation {
+            font-size: 16px;
+            color: #666;
+            display: inline-block;
+            background-color: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        .pronunciation span {
+            margin-right: 15px;
+        }
+        
+        body.dark-mode .pronunciation {
+            color: #aaa;
+            background-color: #333;
+        }
     </style>
 </head>
 <body>
@@ -612,7 +751,7 @@
             </div>
             <div class="card input-card fade-in">
                 <div id="dynamicIsland"></div>
-                <h1>单词喵<br>LLM英语单词高级查询V1.06</h1>
+                <h1>单词喵<br>LLM英语单词高级查询V1.07</h1>
                 <div class="input-wrapper">
                     <input type="text" id="wordInput" placeholder="请输入英语单词">
                     <button id="clearButton" class="clear-button">✖</button>
@@ -635,7 +774,7 @@
         </div>
         <div class="right-panel">
             <div id="resultCard" class="card" style="display: none;">
-                <h2 id="queryWord"></h2>
+                <div id="queryWordContainer"></div>
                 <div id="resultContent"></div>
             </div>
         </div>
@@ -644,126 +783,318 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
-        // API configuration
-        const Gemini_KEY = "QUl6YVN5QVlwVmk5a2pQWTY5LTZMbXhnWklxcDVaQzZ2czNMOFc4";
-        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+        // 使用立即执行函数表达式(IIFE)来避免全局变量污染
+        (function() {
+            'use strict';
 
-        // Function to decode API key
-        function jm(encodedKey) {
-            return atob(encodedKey);
-        }
+            // 常量定义
+            const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+            const GEMINI_KEY = "QUl6YVN5QVlwVmk5a2pQWTY5LTZMbXhnWklxcDVaQzZ2czNMOFc4";
 
-        // Use this function when making API calls
-        function getApiKey() {
-            const API_KEY = jm(Gemini_KEY);
-            return API_KEY;
-        }
+            // 缓存DOM元素引用
+            const elements = {
+                wordInput: document.getElementById('wordInput'),
+                analyzeButton: document.getElementById('analyzeButton'),
+                resultCard: document.getElementById('resultCard'),
+                dynamicIsland: document.getElementById('dynamicIsland'),
+                clearButton: document.getElementById('clearButton'),
+                resultContent: document.getElementById('resultContent'),
+                queryWordContainer: document.getElementById('queryWordContainer')
+            };
 
-        const wordInput = document.getElementById('wordInput');
-        const analyzeButton = document.getElementById('analyzeButton');
-        const resultCard = document.getElementById('resultCard');
-        const dynamicIsland = document.getElementById('dynamicIsland');
-        const clearButton = document.getElementById('clearButton');
-    
-        document.addEventListener('DOMContentLoaded', () => {
-            const analyzeButton = document.getElementById('analyzeButton');
-            const wordInput = document.getElementById('wordInput');
-            const clearButton = document.getElementById('clearButton');
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            const themeToggle = document.getElementById('themeToggle');
-            const advancedSettings = document.getElementById('advancedSettings');
+            // 工具函数
+            const utils = {
+                // 解码API密钥
+                decodeApiKey: (encodedKey) => atob(encodedKey),
 
-            if (analyzeButton) analyzeButton.addEventListener('click', handleAnalyzeClick);
-            if (wordInput) {
-                wordInput.addEventListener('input', toggleClearButton);
-                wordInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') handleAnalyzeClick();
-                });
-            }
-            if (clearButton) clearButton.addEventListener('click', clearInput);
-            if (darkModeToggle) darkModeToggle.addEventListener('click', toggleDarkMode);
-            if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
-            if (advancedSettings) advancedSettings.addEventListener('click', showAdvancedSettings);
-        });
-    
-        function handleAnalyzeClick() {
-            const word = wordInput.value.trim();
-            if (word) {
-                showNotification('正在分析词语...');
-                analyzeWord(word);
-            } else {
-                showNotification('请输入英语单词');
-            }
-        }
-    
-        async function analyzeWord(word) {
-            try {
-                const response = await fetch(`${API_URL}?key=${getApiKey()}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: `请分析以下英语单词，提供以下信息：
-                                       **1. 中文释义**
-                                       **2. 英文释义**
-                                       **3. 近义词**
-                                       **4. 反义词**
-                                       **5. 词源**
-                                       **6. 英文例句**
-                                       
-                                       单词：${word}`
-                            }]
-                        }],
-                        generationConfig: {
-                            temperature: 0.7,
-                            topK: 1,
-                            topP: 1,
-                            maxOutputTokens: 2048,
-                        },
-                    })
-                });
-                
-                if (!response.ok) throw new Error('API请求失败');
-                
-                const data = await response.json();
-                console.log('API响应数据:', data);
-                
-                if (!data.candidates?.[0]?.content?.parts) {
-                    throw new Error('API返回的数据格式不正确');
+                // 显示通知
+                showNotification: (message) => {
+                    const notification = document.createElement('div');
+                    Object.assign(notification.style, {
+                        position: 'fixed',
+                        bottom: '20px',
+                        right: '20px',
+                        padding: '10px',
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        color: '#fff',
+                        borderRadius: '5px'
+                    });
+                    notification.textContent = message;
+                    document.body.appendChild(notification);
+                    setTimeout(() => document.body.removeChild(notification), 3000);
+                },
+
+                // 复制文本到剪贴板
+                copyTextToClipboard: (text) => {
+                    navigator.clipboard.writeText(text)
+                        .then(() => utils.showNotification('已复制到剪贴板'))
+                        .catch(err => {
+                            console.error('复制失败:', err);
+                            utils.showNotification('复制失败，请手动复制');
+                        });
                 }
-                
-                const result = data.candidates[0].content.parts[0].text;
-                console.log('准备显示的结果:', result);
-                displayResult(result, word);
-                showNotification('分析完成');
-            } catch (error) {
-                console.error('API错误:', error);
-                showNotification('分析失败，请重试');
-            }
-        }
-    
-        function displayResult(result, originalWord) {
-            console.log('开始处理结果:', result);
-            const resultCard = document.getElementById('resultCard');
-            const resultContent = document.getElementById('resultContent');
-            if (!resultCard || !resultContent) {
-                console.error('未找到必要的DOM元素');
-                return;
-            }
-            resultCard.style.display = 'block';
-            
-            const queryWordElement = document.getElementById('queryWord');
-            if (queryWordElement) {
-                queryWordElement.textContent = originalWord;
-            } else {
-                console.error('未找到queryWord元素');
-            }
-            
-            const sections = result.split('**').filter(section => section.trim());
-            
-            resultContent.innerHTML = '';
-            
+            };
+
+            // 主要功能函数
+            const app = {
+                // 初始化应用
+                init: () => {
+                    app.attachEventListeners();
+                },
+
+                // 添加事件监听器
+                attachEventListeners: () => {
+                    elements.analyzeButton.addEventListener('click', app.handleAnalyzeClick);
+                    elements.wordInput.addEventListener('input', app.toggleClearButton);
+                    elements.wordInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') app.handleAnalyzeClick();
+                    });
+                    elements.clearButton.addEventListener('click', app.clearInput);
+                    document.getElementById('darkModeToggle').addEventListener('click', app.toggleDarkMode);
+                    document.getElementById('themeToggle').addEventListener('click', app.toggleTheme);
+                    document.getElementById('advancedSettings').addEventListener('click', app.showAdvancedSettings);
+                    elements.resultContent.addEventListener('mouseup', app.handleTextSelection);
+                },
+
+                // 处理分析点击事件
+                handleAnalyzeClick: () => {
+                    const word = elements.wordInput.value.trim();
+                    if (word) {
+                        utils.showNotification('正在分析词语...');
+                        app.analyzeWord(word);
+                        elements.wordInput.classList.add('fade-in-scale');
+                        setTimeout(() => elements.wordInput.classList.remove('fade-in-scale'), 300);
+                    } else {
+                        utils.showNotification('请输入英语单词');
+                    }
+                },
+
+                // 分析单词
+                analyzeWord: async (word) => {
+                    try {
+                        const response = await fetch(`${API_URL}?key=${utils.decodeApiKey(GEMINI_KEY)}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{
+                                    parts: [{
+                                        text: `请分析以下英语单词，提供以下信息：
+                                               **1. 音标（包括英式和美式）**
+                                               **2. 中文释义**
+                                               **3. 英文释义**
+                                               **4. 近义词**
+                                               **5. 反义词**
+                                               **6. 词源**
+                                               **7. 英文例句** 
+                                               单词：${word}`
+                                    }]
+                                }],
+                                generationConfig: {
+                                    temperature: 0.7,
+                                    topK: 1,
+                                    topP: 1,
+                                    maxOutputTokens: 2048,
+                                },
+                            })
+                        });
+                        
+                        if (!response.ok) throw new Error('API请求失败');
+                        
+                        const data = await response.json();
+                        if (!data.candidates?.[0]?.content?.parts) {
+                            throw new Error('API返回的数据格式不正确');
+                        }
+                        
+                        const result = data.candidates[0].content.parts[0].text;
+                        app.displayResult(result, word);
+                        utils.showNotification('分析完成');
+                    } catch (error) {
+                        console.error('API错误:', error);
+                        utils.showNotification('分析失败，请重试');
+                    }
+                },
+
+                // 显示结果
+                displayResult: (result, originalWord) => {
+                    console.log('开始处理结果:', result);
+                    const resultCard = document.getElementById('resultCard');
+                    const resultContent = document.getElementById('resultContent');
+                    if (!resultCard || !resultContent) {
+                        console.error('未找到必要的DOM元素');
+                        return;
+                    }
+                    resultCard.style.display = 'block';
+                    
+                    const queryWordContainer = document.getElementById('queryWordContainer');
+                    if (queryWordContainer) {
+                        queryWordContainer.innerHTML = '';
+                        const queryWordElement = document.createElement('span');
+                        queryWordElement.id = 'queryWord';
+                        queryWordElement.textContent = originalWord;
+                        queryWordContainer.appendChild(queryWordElement);
+                    } else {
+                        console.error('未找到queryWordContainer元素');
+                    }
+                    
+                    resultContent.innerHTML = '';
+                    
+                    // 创建一个数组来存储所有的卡片
+                    const cards = [];
+                    
+                    // 创建音标信息卡片
+                    const ukPronunciation = result.match(/UK: \[(.*?)\]/)?.[1] || '';
+                    const usPronunciation = result.match(/US: \[(.*?)\]/)?.[1] || '';
+                    
+                    if (ukPronunciation || usPronunciation) {
+                        const pronunciationCard = createInfoCard('音标', '');
+                        const pronunciationContent = pronunciationCard.querySelector('.info-card-content');
+                        pronunciationContent.innerHTML = `
+                            ${ukPronunciation ? `<span>UK [${ukPronunciation}]</span>` : ''}
+                            ${usPronunciation ? `<span>US [${usPronunciation}]</span>` : ''}
+                        `;
+                        cards.push(pronunciationCard);
+                    }
+
+                    const sections = result.split('**').filter(section => section.trim());
+                    
+                    sections.forEach((section, index) => {
+                        const [title, ...contentLines] = section.split('\n');
+                        const trimmedTitle = title.trim().replace(/^\d+\.\s*/, '');
+                        let content = contentLines.join('\n').trim();
+
+                        if (trimmedTitle === '近义词' || trimmedTitle === '反义词') {
+                            const words = content.match(/\*([^*]+)/g)?.map(word => word.slice(1).trim()) || [];
+                            const infoCard = createInfoCard(trimmedTitle, '');
+                            const wordTable = createWordTable(words.slice(0, 6));
+                            infoCard.querySelector('.info-card-content').appendChild(wordTable);
+                            cards.push(infoCard);
+                        } else if (trimmedTitle === '英文例句') {
+                            const sentences = content.split('\n').filter(sentence => sentence.trim().startsWith('*'));
+                            content = sentences.map(sentence => sentence.trim().replace(/^\*\s*/, '')).join('\n');
+                            const infoCard = createInfoCard(trimmedTitle, content);
+                            cards.push(infoCard);
+                        } else if (trimmedTitle !== '音标') {
+                            let subcontent = '';
+                            if (trimmedTitle === '中文释义' || trimmedTitle === '英文释义') {
+                                const parts = content.split(/[,，]/);
+                                content = parts[0].trim();
+                                subcontent = parts.slice(1).join(', ').trim();
+                            }
+                            const infoCard = createInfoCard(trimmedTitle, content, subcontent);
+                            cards.push(infoCard);
+                        }
+                    });
+
+                    // 找到中文释义卡片的索引
+                    const chineseDefinitionIndex = cards.findIndex(card => card.querySelector('.info-card-title').textContent === '中文释义');
+                    
+                    // 如果找到中文释义卡片，将音标卡片插入到它前面
+                    if (chineseDefinitionIndex !== -1) {
+                        const pronunciationCard = cards.find(card => card.querySelector('.info-card-title').textContent === '音标');
+                        if (pronunciationCard) {
+                            cards.splice(chineseDefinitionIndex, 0, cards.splice(cards.indexOf(pronunciationCard), 1)[0]);
+                        }
+                    }
+
+                    // 将所有卡片添加到结果内容中
+                    cards.forEach((card, index) => {
+                        card.style.animationDelay = `${index * 0.1}s`;
+                        resultContent.appendChild(card);
+                    });
+
+                    resultCard.style.display = 'block';
+                    resultCard.scrollIntoView({ behavior: 'smooth' });
+                },
+
+                // 切换清除按钮显示
+                toggleClearButton: () => {
+                    elements.clearButton.style.display = elements.wordInput.value ? 'block' : 'none';
+                },
+
+                // 清除输入
+                clearInput: () => {
+                    elements.wordInput.value = '';
+                    elements.clearButton.style.display = 'none';
+                    elements.resultCard.style.display = 'none';
+                    elements.wordInput.focus();
+                },
+
+                // 切换暗黑模式
+                toggleDarkMode: () => {
+                    document.body.classList.toggle('dark-mode');
+                    const darkModeIcon = document.querySelector('#darkModeToggle i');
+                    if (darkModeIcon) {
+                        darkModeIcon.classList.toggle('fa-moon');
+                        darkModeIcon.classList.toggle('fa-sun');
+                    }
+                    utils.showNotification(document.body.classList.contains('dark-mode') ? '已切换到夜间模式' : '已切换到日间模式');
+                },
+
+                // 切换主题
+                toggleTheme: () => {
+                    const themes = ['默认', '像素风', '打字机风格'];
+                    const currentTheme = document.body.getAttribute('data-theme') || '默认';
+                    const nextTheme = themes[(themes.indexOf(currentTheme) + 1) % themes.length];
+                    document.body.setAttribute('data-theme', nextTheme);
+                    app.applyTheme(nextTheme);
+                    utils.showNotification(`已切换到${nextTheme}主题`);
+                },
+
+                // 应用主题
+                applyTheme: (theme) => {
+                    document.body.className = theme !== '默认' ? theme : '';
+                    if (document.querySelector('#darkModeToggle i').classList.contains('fa-sun')) {
+                        document.body.classList.add('dark-mode');
+                    }
+                },
+
+                // 显示高级设置
+                showAdvancedSettings: () => {
+                    utils.showNotification('高级设置功能即将推出');
+                },
+
+                // 处理文本选择
+                handleTextSelection: (event) => {
+                    const selection = window.getSelection();
+                    const selectedText = selection.toString().trim();
+
+                    if (selectedText) {
+                        const range = selection.getRangeAt(0);
+                        const rect = range.getBoundingClientRect();
+
+                        let searchIcon = document.getElementById('floatingSearchIcon');
+                        if (!searchIcon) {
+                            searchIcon = document.createElement('div');
+                            searchIcon.id = 'floatingSearchIcon';
+                            searchIcon.className = 'floating-search-icon fade-in-scale';
+                            searchIcon.innerHTML = '🔍';
+                            document.body.appendChild(searchIcon);
+                        }
+
+                        // 调整位置到选中文本的右下方，并增加一些偏移
+                        searchIcon.style.left = `${rect.right + window.scrollX + 5}px`;
+                        searchIcon.style.top = `${rect.bottom + window.scrollY + 5}px`;
+                        searchIcon.style.opacity = '1';
+                        searchIcon.classList.remove('clicked');
+
+                        searchIcon.onclick = () => {
+                            elements.wordInput.value = selectedText;
+                            app.handleAnalyzeClick();
+                            searchIcon.classList.add('clicked');
+                            setTimeout(() => {
+                                searchIcon.style.opacity = '0';
+                                searchIcon.classList.remove('clicked');
+                            }, 500);
+                        };
+
+                        setTimeout(() => {
+                            searchIcon.style.opacity = '0';
+                        }, 2000);
+                    }
+                }
+            };
+
+            // 创建信息卡片
             function createInfoCard(title, content, subcontent = '') {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'info-card fade-in-up';
@@ -774,7 +1105,21 @@
                 
                 const contentElement = document.createElement('div');
                 contentElement.className = 'info-card-content';
-                contentElement.textContent = content;
+                
+                if (title === '英文例句') {
+                    // 为英文例句创建特殊的格式
+                    const sentences = content.split('\n');
+                    sentences.forEach(sentence => {
+                        if (sentence.trim().startsWith('*')) {
+                            const sentenceElement = document.createElement('div');
+                            sentenceElement.className = 'example-sentence';
+                            sentenceElement.textContent = sentence.trim().substring(1).trim(); // 移除星号并修剪空白
+                            contentElement.appendChild(sentenceElement);
+                        }
+                    });
+                } else {
+                    contentElement.textContent = content;
+                }
                 
                 if (subcontent) {
                     const subcontentElement = document.createElement('div');
@@ -793,120 +1138,46 @@
                         <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
                     </svg>
                 `;
-                copyButton.addEventListener('click', () => copyTextToClipboard(title + ': ' + content + (subcontent ? '\n' + subcontent : '')));
+                copyButton.addEventListener('click', () => utils.copyTextToClipboard(title + ': ' + content + (subcontent ? '\n' + subcontent : '')));
                 cardElement.appendChild(copyButton);
                 
                 return cardElement;
             }
-            
-            sections.forEach((section, index) => {
-                const [title, ...contentLines] = section.split('\n');
-                const trimmedTitle = title.trim().replace(/^\d+\.\s*/, '');
-                let content = contentLines.join(' ').trim();
-                let subcontent = '';
-                
-                if (trimmedTitle === '中文释义' || trimmedTitle === '英文释义') {
-                    const parts = content.split(/[,，]/);
-                    content = parts[0].trim();
-                    subcontent = parts.slice(1).join(', ').trim();
-                }
-                
-                if (trimmedTitle === '英文例句') {
-                    const sentences = content.split(/[.。]/).filter(sentence => sentence.trim());
-                    content = sentences.map(sentence => `• ${sentence.trim()}.`).join('\n');
-                }
-                
-                const infoCard = createInfoCard(trimmedTitle, content, subcontent);
-                infoCard.style.animationDelay = `${index * 0.1}s`; // 添加延迟以创建级联效果
-                resultContent.appendChild(infoCard);
-            });
 
-            resultCard.style.display = 'block';
-            resultCard.scrollIntoView({ behavior: 'smooth' });
-        }
-    
-        function showNotification(message) {
-            const dynamicIsland = document.getElementById('dynamicIsland');
-            dynamicIsland.textContent = message;
-            dynamicIsland.classList.add('show');
-            setTimeout(() => {
-                dynamicIsland.classList.remove('show');
-            }, 3000);
-        }
-    
-        function copyTextToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showNotification('已复制到剪贴板');
-            }).catch(err => {
-                console.error('复制失败:', err);
-                showNotification('复制失败，请手动复制');
-            });
-        }
-    
-        function toggleClearButton() {
-            clearButton.style.display = wordInput.value ? 'block' : 'none';
-        }
-    
-        function clearInput() {
-            wordInput.value = '';
-            clearButton.style.display = 'none';
-            resultCard.style.display = 'none';
-            wordInput.focus();
-        }
-    
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const darkModeIcon = document.querySelector('#darkModeToggle i');
-            if (darkModeIcon) {
-                darkModeIcon.classList.toggle('fa-moon');
-                darkModeIcon.classList.toggle('fa-sun');
+            // 创建单词表格
+            function createWordTable(words) {
+                const table = document.createElement('table');
+                table.className = 'word-table';
+                const row1 = table.insertRow();
+                const row2 = table.insertRow();
+
+                words.forEach((word, index) => {
+                    const cell = (index < 3 ? row1 : row2).insertCell();
+                    cell.className = 'word-cell';
+
+                    const wordText = document.createElement('span');
+                    wordText.className = 'word-text';
+                    wordText.textContent = word;
+
+                    const searchIcon = document.createElement('div');
+                    searchIcon.className = 'search-icon';
+                    searchIcon.innerHTML = '🔍';
+
+                    cell.appendChild(wordText);
+                    cell.appendChild(searchIcon);
+
+                    cell.addEventListener('click', () => {
+                        elements.wordInput.value = word;
+                        app.handleAnalyzeClick();
+                    });
+                });
+
+                return table;
             }
-            showNotification(document.body.classList.contains('dark-mode') ? '已切换到夜间模式' : '已切换到日间模式');
-        }
-    
-        function toggleTheme() {
-            const themes = ['默认', '像素风', '打字机风格'];
-            const currentTheme = document.body.getAttribute('data-theme') || '默认';
-            const currentIndex = themes.indexOf(currentTheme);
-            const nextIndex = (currentIndex + 1) % themes.length;
-            const newTheme = themes[nextIndex];
 
-            document.body.setAttribute('data-theme', newTheme);
-            applyTheme(newTheme);
-            showNotification(`已切换到${newTheme}主题`);
-        }
-    
-        function applyTheme(theme) {
-            document.body.className = ''; // 清除所有类
-            if (theme !== '默认') {
-                document.body.classList.add(theme);
-            }
-            // 日夜模式状态保持不变
-            if (document.querySelector('#darkModeToggle i').classList.contains('fa-sun')) {
-                document.body.classList.add('dark-mode');
-            }
-        }
-    
-        function showAdvancedSettings() {
-            showNotification('高级设置功能即将推出');
-        }
-
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.textContent = message;
-            notification.style.position = 'fixed';
-            notification.style.bottom = '20px';
-            notification.style.right = '20px';
-            notification.style.padding = '10px';
-            notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-            notification.style.color = '#fff';
-            notification.style.borderRadius = '5px';
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 3000);
-        }
+            // 当 DOM 加载完成后初始化应用
+            document.addEventListener('DOMContentLoaded', app.init);
+        })();
     </script>
 </body>
 </html>
