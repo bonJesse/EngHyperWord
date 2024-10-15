@@ -535,7 +535,7 @@
         }
 
         /* 打字机风格 */
-        body[data-theme="打字机风��"] {
+        body[data-theme="打字机风格"] {
             font-family: "Courier New", monospace;
             background-color: #f4e9d9;
             color: #333;
@@ -1059,8 +1059,21 @@
                     const selectedText = selection.toString().trim();
 
                     if (selectedText) {
-                        const range = selection.getRangeAt(0);
-                        const rect = range.getBoundingClientRect();
+                        let rect;
+                        let touchX, touchY;
+
+                        // 检查是否为触摸事件
+                        if (event.type === 'touchend') {
+                            const touch = event.changedTouches[0];
+                            touchX = touch.clientX;
+                            touchY = touch.clientY;
+                            rect = {
+                                right: touchX,
+                                bottom: touchY
+                            };
+                        } else {
+                            rect = selection.getRangeAt(0).getBoundingClientRect();
+                        }
 
                         let searchIcon = document.getElementById('floatingSearchIcon');
                         if (!searchIcon) {
@@ -1072,12 +1085,12 @@
                         }
 
                         // 调整位置到选中文本的右下方，并增加一些偏移
-                        searchIcon.style.left = `${rect.right + window.scrollX + 5}px`;
-                        searchIcon.style.top = `${rect.bottom + window.scrollY + 5}px`;
+                        searchIcon.style.left = `${(touchX || rect.right) + window.scrollX + 5}px`;
+                        searchIcon.style.top = `${(touchY || rect.bottom) + window.scrollY + 5}px`;
                         searchIcon.style.opacity = '1';
                         searchIcon.classList.remove('clicked');
 
-                        searchIcon.onclick = () => {
+                        const handleSearchIconClick = () => {
                             elements.wordInput.value = selectedText;
                             app.handleAnalyzeClick();
                             searchIcon.classList.add('clicked');
@@ -1086,6 +1099,17 @@
                                 searchIcon.classList.remove('clicked');
                             }, 500);
                         };
+
+                        // 移除之前的事件监听器
+                        searchIcon.removeEventListener('click', handleSearchIconClick);
+                        searchIcon.removeEventListener('touchend', handleSearchIconClick);
+
+                        // 添加新的事件监听器
+                        searchIcon.addEventListener('click', handleSearchIconClick);
+                        searchIcon.addEventListener('touchend', (e) => {
+                            e.preventDefault(); // 防止触发额外的点击事件
+                            handleSearchIconClick();
+                        });
 
                         setTimeout(() => {
                             searchIcon.style.opacity = '0';
@@ -1176,7 +1200,12 @@
             }
 
             // 当 DOM 加载完成后初始化应用
-            document.addEventListener('DOMContentLoaded', app.init);
+            document.addEventListener('DOMContentLoaded', () => {
+                app.init();
+                
+                // 添加触摸事件监听器
+                elements.resultContent.addEventListener('touchend', app.handleTextSelection);
+            });
         })();
     </script>
 </body>
